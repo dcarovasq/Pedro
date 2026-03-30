@@ -231,6 +231,18 @@
     cursor: pointer;
     font-family: 'Instrument Sans', sans-serif;
   }
+  .btn-sm {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: 'Instrument Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Motivation banner */
   .motivation-banner {
@@ -286,10 +298,6 @@
   .action-icon { font-size: 1rem; }
 
   /* Training grid */
-  .year-grid {
-    display: grid;
-    gap: 3px;
-  }
   .month-label {
     font-size: 0.7rem;
     color: var(--muted);
@@ -389,12 +397,12 @@
     padding: 14px;
     display: flex; align-items: center; gap: 12px;
     transition: border-color 0.15s;
+    position: relative;
   }
   .badge.unlocked { border-color: rgba(200,240,74,0.4); background: rgba(200,240,74,0.05); }
   .badge-icon { font-size: 1.8rem; }
   .badge-name { font-size: 0.88rem; font-weight: 600; }
   .badge-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-  .badge-locked { opacity: 0.35; filter: grayscale(1); }
 
   /* Diary */
   .diary-entry {
@@ -492,14 +500,51 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  /* Metas */
+  /* Metas - nuevo estilo editable */
   .meta-item {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    gap: 12px;
   }
-  .meta-progress { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--accent); }
-  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; width: 120px; overflow: hidden; }
+  .meta-item:last-child { border-bottom: none; }
+  .meta-left { flex: 1; }
+  .meta-title-text { font-size: 0.88rem; margin-bottom: 2px; }
+  .meta-plazo-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .meta-right { display: flex; align-items: center; gap: 10px; }
+  .meta-progress-wrap { display: flex; align-items: center; gap: 8px; }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; width: 100px; overflow: hidden; }
   .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+  .meta-pct { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--accent); min-width: 36px; text-align: right; }
+  .meta-actions { display: flex; gap: 6px; }
+
+  /* Edit meta modal */
+  .edit-meta-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 480px;
+  }
+
+  /* Badge user-created */
+  .badge-del {
+    position: absolute; top: 8px; right: 8px;
+    background: transparent; border: none;
+    color: var(--muted); font-size: 0.75rem; cursor: pointer;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .badge:hover .badge-del { opacity: 1; }
 
   /* Welcome greeting */
   .greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
@@ -739,9 +784,7 @@
         </div>
       </div>
 
-      <div id="meals-container">
-        <!-- meals injected by JS -->
-      </div>
+      <div id="meals-container"></div>
 
       <div class="card">
         <div class="card-title">💡 Receta recomendada</div>
@@ -864,68 +907,16 @@
         <div class="tab" onclick="switchTab('metas-tab','tab-logros',this)">🏆 Logros</div>
       </div>
 
+      <!-- METAS TAB -->
       <div class="tab-content active" id="tab-metas-list">
         <div class="card">
-          <div class="card-title">Metas semanales</div>
-          <div class="meta-item">
-            <div>
-              <div style="font-size:0.88rem">Ir 3 veces al gym</div>
-              <div style="font-size:0.75rem;color:var(--muted)">Esta semana</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
-              <div class="meta-progress">2/3</div>
-            </div>
-          </div>
-          <div class="meta-item">
-            <div>
-              <div style="font-size:0.88rem">Comer bien 5 días</div>
-              <div style="font-size:0.75rem;color:var(--muted)">Esta semana</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
-              <div class="meta-progress">3/5</div>
-            </div>
-          </div>
-          <div class="meta-item">
-            <div>
-              <div style="font-size:0.88rem">Registrar emociones</div>
-              <div style="font-size:0.75px;color:var(--muted)">Esta semana</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
-              <div class="meta-progress" style="color:var(--success)">7/7 ✦</div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Metas mensuales</div>
-          <div class="meta-item">
-            <div>
-              <div style="font-size:0.88rem">Bajar % grasa corporal</div>
-              <div style="font-size:0.75rem;color:var(--muted)">Este mes</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
-              <div class="meta-progress">En progreso</div>
-            </div>
-          </div>
-          <div class="meta-item">
-            <div>
-              <div style="font-size:0.88rem">Mejorar fuerza en press banca</div>
-              <div style="font-size:0.75rem;color:var(--muted)">Este mes</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
-              <div class="meta-progress">+5 kg</div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
           <div class="card-title">Agregar meta</div>
-          <div class="grid-2">
-            <div class="inp-group"><label class="inp-label">Descripción</label><input type="text" class="inp" id="meta-desc" placeholder="Mi meta..."></div>
-            <div class="inp-group">
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="inp-group" style="margin:0">
+              <label class="inp-label">Descripción</label>
+              <input type="text" class="inp" id="meta-desc" placeholder="Mi meta...">
+            </div>
+            <div class="inp-group" style="margin:0">
               <label class="inp-label">Plazo</label>
               <select class="inp" id="meta-plazo">
                 <option>Semanal</option>
@@ -936,9 +927,34 @@
           </div>
           <button class="btn" onclick="addMeta()">Agregar meta ✦</button>
         </div>
+
+        <div class="card">
+          <div class="card-title">Mis metas</div>
+          <div id="metas-list"></div>
+        </div>
       </div>
 
+      <!-- LOGROS TAB -->
       <div class="tab-content" id="tab-logros">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title">Agregar logro</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="inp-group" style="margin:0">
+              <label class="inp-label">Nombre del logro</label>
+              <input type="text" class="inp" id="badge-name-inp" placeholder="Ej: Primera semana completa">
+            </div>
+            <div class="inp-group" style="margin:0">
+              <label class="inp-label">Descripción</label>
+              <input type="text" class="inp" id="badge-desc-inp" placeholder="Ej: Completé 7 días seguidos">
+            </div>
+          </div>
+          <div class="inp-group" style="margin-bottom:12px">
+            <label class="inp-label">Emoji / ícono</label>
+            <input type="text" class="inp" id="badge-icon-inp" placeholder="🏆" maxlength="4" style="width:80px">
+          </div>
+          <button class="btn" onclick="addBadge()">Agregar logro ✦</button>
+        </div>
+
         <div class="grid-2" id="badges-grid"></div>
       </div>
     </div>
@@ -984,9 +1000,7 @@
         <button class="btn" onclick="addOcio()">Agregar ✦</button>
       </div>
 
-      <div class="grid-3" id="ocio-grid">
-        <!-- injected -->
-      </div>
+      <div class="grid-3" id="ocio-grid"></div>
     </div>
 
   </div><!-- end main -->
@@ -1010,6 +1024,35 @@
     <div style="display:flex;gap:12px;margin-top:8px">
       <button class="btn" onclick="saveDayModal()">Guardar</button>
       <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit meta modal -->
+<div class="modal-overlay" id="edit-meta-modal">
+  <div class="edit-meta-modal">
+    <div class="modal-title">Editar meta</div>
+    <input type="hidden" id="edit-meta-id">
+    <div class="inp-group">
+      <label class="inp-label">Descripción</label>
+      <input type="text" class="inp" id="edit-meta-desc" placeholder="Mi meta...">
+    </div>
+    <div class="inp-group">
+      <label class="inp-label">Plazo</label>
+      <select class="inp" id="edit-meta-plazo">
+        <option>Semanal</option>
+        <option>Mensual</option>
+        <option>Anual</option>
+      </select>
+    </div>
+    <div class="inp-group">
+      <label class="inp-label">Progreso (%)</label>
+      <input type="range" id="edit-meta-progress" min="0" max="100" step="5" style="width:100%;accent-color:var(--accent)">
+      <span id="edit-meta-progress-val" style="font-size:0.8rem;color:var(--accent);font-family:'DM Mono',monospace">0%</span>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button class="btn" onclick="saveEditMeta()">Guardar cambios</button>
+      <button class="btn-ghost" onclick="closeEditMetaModal()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1045,7 +1088,7 @@ function showSection(id, el) {
   document.getElementById('s-'+id).classList.add('active');
   el.classList.add('active');
   if (id==='entrenamiento') renderYearGrid();
-  if (id==='metas') renderBadges();
+  if (id==='metas') { renderMetas(); renderBadges(); }
   if (id==='dashboard') updateDashboard();
 }
 
@@ -1069,14 +1112,15 @@ const quotes = [
   "Estás avanzando aunque no lo veas.",
   "Cada día que apareces, ya ganaste.",
   "No necesitas ser perfecto, solo constante.",
-  "Tu cuerpo está haciendo lo que puede. Respétalo.",
   "El progreso no siempre se ve. Pero existe.",
-  "Hoy también cuenta."
+  "Hoy también cuenta.",
+  "Pequeños pasos, grandes distancias.",
+  "Lo que haces hoy, lo agradeces mañana."
 ];
 
 function updateDashboard() {
   const now = new Date();
-  document.getElementById('dash-date-text').textContent = now.toLocaleDateString('es-CO', {weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('dash-date-text').textContent = now.toLocaleDateString('es-CO', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('dash-time').textContent = now.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
   document.getElementById('dash-quote').textContent = '"' + quotes[now.getDay()] + '"';
 
@@ -1100,13 +1144,11 @@ function updateDashboard() {
   finances.forEach(f => bal += f.tipo==='ingreso' ? f.monto : -f.monto);
   document.getElementById('dash-balance').textContent = '$' + bal.toLocaleString();
 
-  // tasks preview
   const tasks = S.get('tasks', []);
   const taskList = document.getElementById('dash-tasks-list');
   const pending = tasks.filter(t=>!t.done).slice(0,3);
   taskList.innerHTML = pending.length ? pending.map(t=>`<div class="task-item"><div class="task-check" style="border-color:var(--muted)"></div><div class="task-text">${t.text}</div></div>`).join('') : '<div style="color:var(--muted);font-size:0.85rem">Sin pendientes ✦</div>';
 
-  // actions preview from mood
   const actDiv = document.getElementById('dash-actions-preview');
   if (todayEmo) {
     actDiv.innerHTML = getActions(todayEmo.mood).map(a=>`<div class="action-item"><span class="action-icon">${a.icon}</span>${a.text}</div>`).join('');
@@ -1126,22 +1168,22 @@ function getActions(mood) {
   const map = {
     bad: [
       {icon:'🚶',text:'Salir a caminar 10 minutos'},
-      {icon:'🪞',text:'Evita mirarte al espejo hoy'},
       {icon:'📝',text:'Escribe 3 cosas que sí haces bien'},
       {icon:'🏋️',text:'Ir al gym suave, sin exigirte'},
-      {icon:'🎵',text:'Escucha música que te guste'}
+      {icon:'🎵',text:'Escucha música que te guste'},
+      {icon:'😴',text:'Descansa bien esta noche'}
     ],
     neutral: [
       {icon:'💪',text:'Entrena ligero hoy'},
       {icon:'🥗',text:'Come bien, un paso a la vez'},
       {icon:'💧',text:'Toma suficiente agua'},
       {icon:'😴',text:'Intenta dormir mejor esta noche'},
-      {icon:'🙅',text:'Evita compararte con otros hoy'}
+      {icon:'🎯',text:'Define una pequeña meta para mañana'}
     ],
     good: [
       {icon:'🔥',text:'Sube la intensidad en el gym'},
       {icon:'🆕',text:'Prueba un ejercicio nuevo'},
-      {icon:'📸',text:'Tómate una foto de progreso'},
+      {icon:'📸',text:'Documenta tu progreso'},
       {icon:'🤝',text:'Ayuda a alguien hoy'},
       {icon:'📋',text:'Planea tu meta para la próxima semana'}
     ],
@@ -1182,15 +1224,16 @@ function renderYearGrid() {
 
   const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const today = new Date();
+  const YEAR = 2026;
   let html = '';
 
   for(let m=0; m<12; m++) {
-    const daysInMonth = new Date(2026, m+1, 0).getDate();
-    html += `<div class="month-block"><div class="month-label">${months[m]} 2026</div><div class="days-row">`;
+    const daysInMonth = new Date(YEAR, m+1, 0).getDate();
+    html += `<div class="month-block"><div class="month-label">${months[m]} ${YEAR}</div><div class="days-row">`;
     for(let d=1; d<=daysInMonth; d++) {
-      const key = `2026-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const key = `${YEAR}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const tipo = trainMap[key] || '';
-      const isToday = today.getFullYear()===2026 && today.getMonth()===m && today.getDate()===d;
+      const isToday = today.getFullYear()===YEAR && today.getMonth()===m && today.getDate()===d;
       html += `<div class="day-cell ${tipo} ${isToday?'today':''}" onclick="openDayModal('${key}',${d},'${months[m]}')" title="${key}: ${tipo||'Sin registrar'}"></div>`;
     }
     html += '</div></div>';
@@ -1368,7 +1411,7 @@ function renderDiary() {
   const entries = S.get('diary', []);
   const div = document.getElementById('diary-entries');
   div.innerHTML = entries.slice(0,10).map(e => `<div class="diary-entry">
-    <div class="diary-date">${new Date(e.date).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="diary-date">${new Date(e.date).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     <div class="diary-text">${e.text}</div>
   </div>`).join('') || '<div style="color:var(--muted);font-size:0.85rem">Aún no hay entradas.</div>';
 }
@@ -1379,13 +1422,7 @@ function addTask() {
   const text = inp.value.trim();
   if(!text) return;
   const tasks = S.get('tasks', []);
-  // Simple subtask split
-  const subtasks = text.length > 20 ? [
-    { text: '→ Empezar: '+text.slice(0,30), done: false },
-    { text: '→ Continuar', done: false },
-    { text: '→ Revisar y cerrar', done: false }
-  ] : [];
-  tasks.push({ text, done: false, subtasks, date: new Date().toISOString() });
+  tasks.push({ text, done: false, date: new Date().toISOString() });
   S.set('tasks', tasks);
   inp.value = '';
   renderTasks();
@@ -1407,10 +1444,7 @@ function renderTasks() {
   div.innerHTML = tasks.map((t,i) => `
     <div class="task-item">
       <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${i})">${t.done?'✓':''}</div>
-      <div>
-        <div class="task-text ${t.done?'done':''}">${t.text}</div>
-        ${t.subtasks?.length ? '<div class="task-sub">'+t.subtasks.map(s=>`<span style="margin-right:10px;color:var(--muted)">${s.text}</span>`).join('')+'</div>' : ''}
-      </div>
+      <div class="task-text ${t.done?'done':''}">${t.text}</div>
     </div>
   `).join('');
 }
@@ -1459,35 +1493,120 @@ function addMeta() {
   if(!desc) return;
   const plazo = document.getElementById('meta-plazo').value;
   const metas = S.get('metas', []);
-  metas.push({ desc, plazo, progress: 0, date: new Date().toISOString() });
+  metas.push({ id: Date.now(), desc, plazo, progress: 0, date: new Date().toISOString() });
   S.set('metas', metas);
   document.getElementById('meta-desc').value = '';
+  renderMetas();
   showToast('✦ Meta agregada');
 }
 
-// ── LOGROS ──
-const allBadges = [
-  { icon:'🔥', name:'5 días seguidos', desc:'Entrenaste 5 días consecutivos', key:'streak5' },
-  { icon:'📝', name:'Diario constante', desc:'Registraste emociones 7 días seguidos', key:'emo7' },
-  { icon:'💪', name:'Primer mes', desc:'Completaste un mes de entrenamiento', key:'month1' },
-  { icon:'🥗', name:'Semana limpia', desc:'Registraste nutrición 7 días', key:'nut7' },
-  { icon:'🧠', name:'Sin hablarme mal', desc:'Un día sin comentarios negativos sobre ti', key:'nokill' },
-  { icon:'🌱', name:'Inicio', desc:'Creaste tu Sistema Pedro', key:'start' },
-];
-
-function renderBadges() {
-  const unlocked = S.get('badges', ['start']);
-  const grid = document.getElementById('badges-grid');
-  grid.innerHTML = allBadges.map(b => {
-    const isUnlocked = unlocked.includes(b.key);
-    return `<div class="badge ${isUnlocked?'unlocked':'badge-locked'}">
-      <div class="badge-icon">${b.icon}</div>
-      <div>
-        <div class="badge-name">${b.name}</div>
-        <div class="badge-desc">${b.desc}</div>
+function renderMetas() {
+  const metas = S.get('metas', []);
+  const div = document.getElementById('metas-list');
+  if(!metas.length) {
+    div.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:8px 0">Agrega tu primera meta arriba ✦</div>';
+    return;
+  }
+  div.innerHTML = metas.map((m, i) => {
+    const pct = m.progress || 0;
+    const plazoColor = m.plazo === 'Semanal' ? 'var(--accent)' : m.plazo === 'Mensual' ? 'var(--accent2)' : 'var(--accent3)';
+    return `<div class="meta-item">
+      <div class="meta-left">
+        <div class="meta-title-text">${m.desc}</div>
+        <span class="meta-plazo-badge" style="color:${plazoColor};border-color:${plazoColor}20">${m.plazo}</span>
+      </div>
+      <div class="meta-right">
+        <div class="meta-progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${plazoColor}"></div></div>
+          <div class="meta-pct" style="color:${plazoColor}">${pct}%</div>
+        </div>
+        <div class="meta-actions">
+          <button class="btn-sm" onclick="openEditMeta(${i})">Editar</button>
+          <button class="btn-danger" onclick="deleteMeta(${i})">✕</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function openEditMeta(i) {
+  const metas = S.get('metas', []);
+  const m = metas[i];
+  document.getElementById('edit-meta-id').value = i;
+  document.getElementById('edit-meta-desc').value = m.desc;
+  document.getElementById('edit-meta-plazo').value = m.plazo;
+  const slider = document.getElementById('edit-meta-progress');
+  slider.value = m.progress || 0;
+  document.getElementById('edit-meta-progress-val').textContent = (m.progress||0)+'%';
+  slider.oninput = () => { document.getElementById('edit-meta-progress-val').textContent = slider.value+'%'; };
+  document.getElementById('edit-meta-modal').classList.add('open');
+}
+
+function saveEditMeta() {
+  const i = parseInt(document.getElementById('edit-meta-id').value);
+  const metas = S.get('metas', []);
+  metas[i].desc = document.getElementById('edit-meta-desc').value.trim();
+  metas[i].plazo = document.getElementById('edit-meta-plazo').value;
+  metas[i].progress = parseInt(document.getElementById('edit-meta-progress').value);
+  S.set('metas', metas);
+  closeEditMetaModal();
+  renderMetas();
+  showToast('✦ Meta actualizada');
+}
+
+function deleteMeta(i) {
+  const metas = S.get('metas', []);
+  metas.splice(i, 1);
+  S.set('metas', metas);
+  renderMetas();
+  showToast('Meta eliminada');
+}
+
+function closeEditMetaModal() {
+  document.getElementById('edit-meta-modal').classList.remove('open');
+}
+
+// ── LOGROS (user-created) ──
+function addBadge() {
+  const name = document.getElementById('badge-name-inp').value.trim();
+  const desc = document.getElementById('badge-desc-inp').value.trim();
+  const icon = document.getElementById('badge-icon-inp').value.trim() || '🏆';
+  if(!name) { showToast('Escribe el nombre del logro'); return; }
+  const badges = S.get('badges', []);
+  badges.push({ id: Date.now(), name, desc, icon, date: new Date().toISOString() });
+  S.set('badges', badges);
+  document.getElementById('badge-name-inp').value = '';
+  document.getElementById('badge-desc-inp').value = '';
+  document.getElementById('badge-icon-inp').value = '';
+  renderBadges();
+  showToast('✦ Logro añadido');
+}
+
+function deleteBadge(id) {
+  const badges = S.get('badges', []).filter(b => b.id !== id);
+  S.set('badges', badges);
+  renderBadges();
+  showToast('Logro eliminado');
+}
+
+function renderBadges() {
+  const badges = S.get('badges', []);
+  const grid = document.getElementById('badges-grid');
+  if(!badges.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:8px 0;grid-column:span 2">Agrega tu primer logro arriba ✦</div>';
+    return;
+  }
+  grid.innerHTML = badges.map(b => `
+    <div class="badge unlocked" style="position:relative">
+      <div class="badge-icon">${b.icon}</div>
+      <div style="flex:1">
+        <div class="badge-name">${b.name}</div>
+        ${b.desc ? `<div class="badge-desc">${b.desc}</div>` : ''}
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace">${new Date(b.date).toLocaleDateString('es-CO')}</div>
+      </div>
+      <button class="badge-del" onclick="deleteBadge(${b.id})">✕</button>
+    </div>
+  `).join('');
 }
 
 // ── OCIO ──
@@ -1526,11 +1645,9 @@ function initApp() {
   renderFinances();
   renderMeals();
   renderOcio();
+  renderMetas();
+  renderBadges();
   addExerciseRow();
-  // Unlock start badge
-  const badges = S.get('badges', []);
-  if(!badges.includes('start')) { badges.push('start'); S.set('badges', badges); }
-  // Refresh time
   setInterval(() => {
     if(document.getElementById('s-dashboard').classList.contains('active')) {
       document.getElementById('dash-time').textContent = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
@@ -1538,10 +1655,9 @@ function initApp() {
   }, 60000);
 }
 
-// Close modal on backdrop click
-document.getElementById('day-modal').addEventListener('click', function(e) {
-  if(e.target === this) closeModal();
-});
+// Close modals on backdrop click
+document.getElementById('day-modal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+document.getElementById('edit-meta-modal').addEventListener('click', function(e) { if(e.target===this) closeEditMetaModal(); });
 </script>
 </body>
 </html>
