@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Pedro</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8f04a;
+    --accent2: #f0a44a;
+    --accent3: #4ac8f0;
+    --text: #f0ece4;
+    --muted: #6b6b6b;
+    --danger: #f04a4a;
+    --success: #4af0a4;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 32px;
+  }
+  .login-title {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem; font-weight: 300;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+  .login-title span { color: var(--accent); font-style: italic; }
+  .login-sub { color: var(--muted); font-size: 0.9rem; }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    width: 340px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .login-box input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-btn {
+    background: var(--accent);
+    color: #0e0e0e;
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-error {
+    color: var(--danger);
+    font-size: 0.82rem;
+    text-align: center;
+    display: none;
+  }
+
+  /* ── MAIN APP ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 24px 0; z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 0 20px 24px;
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo span { color: var(--accent); font-style: italic; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,240,74,0.06); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  /* Main content */
+  .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* Page title */
+  .page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem; font-weight: 300;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .page-title em { font-style: italic; color: var(--accent); }
+  .page-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 32px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* Stat boxes */
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 300; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.orange { color: var(--accent2); }
+  .stat-value.blue { color: var(--accent3); }
+
+  /* Inputs */
+  .inp {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .inp:focus { border-color: var(--accent); }
+  select.inp option { background: var(--surface2); }
+  .inp-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .inp-label { font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* Buttons */
+  .btn {
+    background: var(--accent);
+    color: #0e0e0e;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 9px 18px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger {
+    background: rgba(240,74,74,0.15);
+    border: 1px solid rgba(240,74,74,0.3);
+    color: var(--danger);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'Instrument Sans', sans-serif;
+  }
+
+  /* Motivation banner */
+  .motivation-banner {
+    background: linear-gradient(135deg, rgba(200,240,74,0.12), rgba(74,200,240,0.08));
+    border: 1px solid rgba(200,240,74,0.2);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative; overflow: hidden;
+  }
+  .motivation-banner::before {
+    content: '✦';
+    position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
+    font-size: 3rem; color: rgba(200,240,74,0.15);
+  }
+  .motivation-quote {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem; font-weight: 300; font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .motivation-sub { font-size: 0.78rem; color: var(--muted); margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+  /* Emoji scale */
+  .emoji-scale { display: flex; gap: 12px; flex-wrap: wrap; }
+  .emoji-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .emoji-btn span { font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .emoji-btn.selected { border-color: var(--accent); background: rgba(200,240,74,0.08); }
+  .emoji-btn:hover { border-color: var(--accent2); }
+
+  /* Action suggestions */
+  .action-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .action-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .action-item:hover { border-color: var(--accent3); color: var(--accent3); }
+  .action-icon { font-size: 1rem; }
+
+  /* Training grid */
+  .year-grid {
+    display: grid;
+    gap: 3px;
+  }
+  .month-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .month-block { margin-bottom: 16px; }
+  .days-row { display: flex; gap: 3px; flex-wrap: wrap; }
+  .day-cell {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.1s;
+    font-size: 0.55rem;
+    display: flex; align-items: center; justify-content: center;
+    color: transparent;
+    position: relative;
+  }
+  .day-cell:hover { border-color: var(--accent); transform: scale(1.2); z-index: 2; }
+  .day-cell.fuerza { background: rgba(200,240,74,0.4); border-color: var(--accent); }
+  .day-cell.cardio { background: rgba(74,200,240,0.4); border-color: var(--accent3); }
+  .day-cell.descanso { background: rgba(240,164,74,0.3); border-color: var(--accent2); }
+  .day-cell.natacion { background: rgba(74,74,240,0.4); border-color: #8080ff; }
+  .day-cell.volleyball { background: rgba(240,74,200,0.4); border-color: #f04ac8; }
+  .day-cell.today { box-shadow: 0 0 0 2px var(--text); }
+
+  /* Grid legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* Exercise list */
+  .exercise-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .exercise-row .inp { margin: 0; }
+
+  /* Tags */
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tag:hover, .tag.active { border-color: var(--accent); color: var(--accent); background: rgba(200,240,74,0.08); }
+
+  /* Nutrition bars */
+  .macro-bar { margin-bottom: 12px; }
+  .macro-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+  .bar-track { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-fill.protein { background: var(--accent); }
+  .bar-fill.carbs { background: var(--accent2); }
+  .bar-fill.fat { background: var(--accent3); }
+
+  /* Meal cards */
+  .meal-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .meal-title { font-size: 0.8rem; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+  /* Finance rows */
+  .finance-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .finance-row:last-child { border-bottom: none; }
+  .finance-cat { color: var(--muted); font-size: 0.78rem; font-family: 'DM Mono', monospace; }
+  .amount-pos { color: var(--success); font-weight: 600; }
+  .amount-neg { color: var(--danger); font-weight: 600; }
+
+  /* Achievement badges */
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .badge.unlocked { border-color: rgba(200,240,74,0.4); background: rgba(200,240,74,0.05); }
+  .badge-icon { font-size: 1.8rem; }
+  .badge-name { font-size: 0.88rem; font-weight: 600; }
+  .badge-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .badge-locked { opacity: 0.35; filter: grayscale(1); }
+
+  /* Diary */
+  .diary-entry {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .diary-entry:hover { border-color: var(--accent3); }
+  .diary-date { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+  .diary-text { font-size: 0.88rem; line-height: 1.6; color: var(--text); }
+  textarea.inp { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+  /* Tasks */
+  .task-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 18px; height: 18px; flex-shrink: 0;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .task-check.done { background: var(--accent); border-color: var(--accent); color: #0e0e0e; font-size: 0.7rem; }
+  .task-text { font-size: 0.88rem; flex: 1; line-height: 1.5; }
+  .task-text.done { text-decoration: line-through; color: var(--muted); }
+  .task-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  /* Ocio cards */
+  .media-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: border-color 0.15s;
+  }
+  .media-card:hover { border-color: var(--accent2); }
+  .media-type { font-size: 0.7rem; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .media-name { font-size: 0.92rem; font-weight: 600; }
+  .media-stars { color: var(--accent2); font-size: 0.8rem; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    font-size: 0.88rem;
+    z-index: 9999;
+    animation: slideUp 0.3s ease;
+    display: none;
+    max-width: 300px;
+  }
+  @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Day modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    width: 560px; max-height: 80vh; overflow-y: auto;
+  }
+  .modal-title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 20px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius); padding: 4px; margin-bottom: 20px; }
+  .tab {
+    flex: 1; padding: 8px; text-align: center; cursor: pointer;
+    border-radius: 8px; font-size: 0.82rem; color: var(--muted);
+    transition: all 0.15s;
+  }
+  .tab.active { background: var(--surface); color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Metas */
+  .meta-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .meta-progress { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; width: 120px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+
+  /* Welcome greeting */
+  .greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .greeting-text h2 { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 300; }
+  .greeting-text p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+  .greeting-date { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); text-align: right; }
+
+  /* Responsive adjustments */
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .nav-item span { display: none; }
+    .sidebar-logo span { display: none; }
+    .main { margin-left: 60px; padding: 20px; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div style="text-align:center">
+    <div class="login-title">Sistema <span>Pedro</span></div>
+    <div class="login-sub">Tu sistema. Tu ritmo. Tu avance.</div>
+  </div>
+  <div class="login-box">
+    <input type="text" id="login-user" placeholder="Usuario" class="inp">
+    <input type="password" id="login-pass" placeholder="Contraseña" class="inp">
+    <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    <div class="login-error" id="login-error">❌ Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">S<span>P</span></div>
+    <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="showSection('emocional',this)"><span class="nav-icon">🧠</span><span>Emocional</span></div>
+    <div class="nav-item" onclick="showSection('entrenamiento',this)"><span class="nav-icon">💪</span><span>Entrenamiento</span></div>
+    <div class="nav-item" onclick="showSection('nutricion',this)"><span class="nav-icon">🍽</span><span>Nutrición</span></div>
+    <div class="nav-item" onclick="showSection('diario',this)"><span class="nav-icon">📒</span><span>Diario</span></div>
+    <div class="nav-item" onclick="showSection('finanzas',this)"><span class="nav-icon">💰</span><span>Finanzas</span></div>
+    <div class="nav-item" onclick="showSection('metas',this)"><span class="nav-icon">🎯</span><span>Metas</span></div>
+    <div class="nav-item" onclick="showSection('ocio',this)"><span class="nav-icon">🎬</span><span>Ocio</span></div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="s-dashboard">
+      <div class="greeting">
+        <div class="greeting-text">
+          <h2>Buenas, <em style="font-style:italic;color:var(--accent)">Pedro</em> ✦</h2>
+          <p id="dash-date-text"></p>
+        </div>
+        <div class="greeting-date" id="dash-time"></div>
+      </div>
+
+      <div class="motivation-banner">
+        <div class="motivation-quote" id="dash-quote">"Estás avanzando aunque no lo veas."</div>
+        <div class="motivation-sub">— Sistema Pedro</div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="stat-box">
+          <div class="stat-label">Estado hoy</div>
+          <div class="stat-value" id="dash-emotion">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Entrenamiento</div>
+          <div class="stat-value green" id="dash-trained">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Calorías</div>
+          <div class="stat-value orange" id="dash-cal">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Balance</div>
+          <div class="stat-value blue" id="dash-balance">$0</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Pendientes de hoy</div>
+          <div id="dash-tasks-list"></div>
+          <button class="btn-ghost" style="margin-top:12px;width:100%" onclick="showSection('diario', document.querySelector('[onclick*=diario]'))">Ver agenda →</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Acciones sugeridas</div>
+          <div id="dash-actions-preview" class="action-list">
+            <div class="action-item"><span class="action-icon">💡</span> Registra tu estado emocional</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMOCIONAL -->
+    <div class="section" id="s-emocional">
+      <div class="page-title">Check <em>Emocional</em></div>
+      <div class="page-sub">¿Cómo estás hoy, Pedro?</div>
+
+      <div class="card">
+        <div class="card-title">¿Cómo te sientes ahora?</div>
+        <div class="emoji-scale">
+          <div class="emoji-btn" onclick="selectMood(this,'😞','bad')">😞 <span>Mal</span></div>
+          <div class="emoji-btn" onclick="selectMood(this,'😐','neutral')">😐 <span>Regular</span></div>
+          <div class="emoji-btn" onclick="selectMood(this,'🙂','good')">🙂 <span>Bien</span></div>
+          <div class="emoji-btn" onclick="selectMood(this,'😄','great')">😄 <span>Genial</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">¿Qué pensaste sobre tu cuerpo hoy?</div>
+        <textarea class="inp" id="body-thought" placeholder="Escribe libremente, sin juicio..." rows="3"></textarea>
+      </div>
+
+      <div class="card" id="actions-card" style="display:none">
+        <div class="card-title" id="actions-title">Acciones sugeridas para ti hoy</div>
+        <div class="action-list" id="actions-list"></div>
+        <button class="btn" style="margin-top:16px" onclick="saveEmotion()">Guardar ✦</button>
+      </div>
+    </div>
+
+    <!-- ENTRENAMIENTO -->
+    <div class="section" id="s-entrenamiento">
+      <div class="page-title">Entrenamiento <em>Anual</em></div>
+      <div class="page-sub">Cada celda es un día. Tu historia en verde.</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(200,240,74,0.5)"></div>Fuerza</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(74,200,240,0.5)"></div>Cardio</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(240,164,74,0.4)"></div>Descanso</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(74,74,240,0.5)"></div>Natación</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(240,74,200,0.4)"></div>Volleyball</div>
+      </div>
+
+      <div class="card" id="year-grid-container"></div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Registrar ejercicios del día</div>
+        <div class="grid-2" style="margin-bottom:14px">
+          <div class="inp-group">
+            <label class="inp-label">Tipo</label>
+            <select class="inp" id="train-tipo">
+              <option>Fuerza</option>
+              <option>Cardio</option>
+              <option>Descanso</option>
+              <option>Natación</option>
+              <option>Volleyball</option>
+            </select>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Grupo muscular</label>
+            <select class="inp" id="train-grupo">
+              <option>Pecho</option>
+              <option>Espalda</option>
+              <option>Pierna</option>
+              <option>Hombro</option>
+              <option>Bíceps</option>
+              <option>Tríceps</option>
+              <option>Core</option>
+              <option>Full body</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:8px">Ejercicios</div>
+        <div class="exercise-row" style="font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px">
+          <span>Ejercicio</span><span>Peso (kg)</span><span>Series</span><span>Reps</span><span></span>
+        </div>
+        <div id="exercise-list"></div>
+        <button class="btn-ghost" onclick="addExerciseRow()" style="margin-top:8px">+ Agregar ejercicio</button>
+
+        <div style="margin-top:16px; display:flex; gap:12px; align-items:flex-end">
+          <div class="inp-group" style="margin:0;flex:1">
+            <label class="inp-label">Km caminados / actividad adicional</label>
+            <input type="number" class="inp" id="train-km" placeholder="0" step="0.1">
+          </div>
+          <div class="inp-group" style="margin:0;flex:1">
+            <label class="inp-label">Tiempo (min)</label>
+            <input type="number" class="inp" id="train-tiempo" placeholder="0">
+          </div>
+        </div>
+
+        <button class="btn" style="margin-top:16px" onclick="saveTraining()">Guardar entrenamiento ✦</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Rutinas guardadas</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="rutinas-tags">
+          <div class="tag active" onclick="applyRutina('pecho')">💪 Rutina Pecho</div>
+          <div class="tag" onclick="applyRutina('pierna')">🦵 Rutina Pierna</div>
+          <div class="tag" onclick="applyRutina('espalda')">🏋️ Rutina Espalda</div>
+          <div class="tag" onclick="applyRutina('cardio')">🏃 Cardio HIIT</div>
+        </div>
+        <button class="btn-ghost" onclick="saveRutina()">Guardar rutina actual</button>
+      </div>
+    </div>
+
+    <!-- NUTRICIÓN -->
+    <div class="section" id="s-nutricion">
+      <div class="page-title">Nutri<em>ción</em></div>
+      <div class="page-sub">Lo que comes te construye.</div>
+
+      <div class="grid-3" style="margin-bottom:20px">
+        <div class="stat-box">
+          <div class="stat-label">Calorías totales</div>
+          <div class="stat-value green" id="nut-cal-total">0 kcal</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Proteína</div>
+          <div class="stat-value orange" id="nut-prot">0g</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Carbs</div>
+          <div class="stat-value blue" id="nut-carbs">0g</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Macros del día</div>
+        <div class="macro-bar">
+          <div class="macro-label"><span>Proteína</span><span id="prot-pct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill protein" id="prot-bar" style="width:0%"></div></div>
+        </div>
+        <div class="macro-bar">
+          <div class="macro-label"><span>Carbohidratos</span><span id="carb-pct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill carbs" id="carb-bar" style="width:0%"></div></div>
+        </div>
+        <div class="macro-bar">
+          <div class="macro-label"><span>Grasas</span><span id="fat-pct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill fat" id="fat-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div id="meals-container">
+        <!-- meals injected by JS -->
+      </div>
+
+      <div class="card">
+        <div class="card-title">💡 Receta recomendada</div>
+        <div id="recipe-suggestion" style="font-size:0.9rem;line-height:1.7;color:var(--text)">
+          🍗 <strong>Pollo + arroz + verduras</strong><br>
+          <span style="color:var(--muted);font-size:0.82rem">~450 kcal · 42g proteína · 45g carbs · 8g grasa</span><br><br>
+          🥚 <strong>Omelette alto en proteína</strong><br>
+          <span style="color:var(--muted);font-size:0.82rem">~280 kcal · 28g proteína · 4g carbs · 16g grasa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIARIO -->
+    <div class="section" id="s-diario">
+      <div class="page-title">Diario <em>+ Agenda</em></div>
+      <div class="page-sub">Lo que sientes, lo que haces.</div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('diario-tab','tab-diario',this)">📝 Diario</div>
+        <div class="tab" onclick="switchTab('diario-tab','tab-agenda',this)">📋 Agenda</div>
+      </div>
+
+      <div class="tab-content active" id="tab-diario">
+        <div class="card">
+          <div class="card-title">Nueva entrada</div>
+          <textarea class="inp" id="diary-input" placeholder="Escribe lo que piensas, sientes, planeas..." rows="5"></textarea>
+          <button class="btn" style="margin-top:12px" onclick="saveDiary()">Guardar entrada ✦</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Entradas anteriores</div>
+          <div id="diary-entries"></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-agenda">
+        <div class="card">
+          <div class="card-title">Agregar tarea</div>
+          <div style="display:flex;gap:10px">
+            <input type="text" class="inp" id="task-input" placeholder="Ej: Estudiar para el examen...">
+            <button class="btn" onclick="addTask()">+</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Pendientes</div>
+          <div id="task-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANZAS -->
+    <div class="section" id="s-finanzas">
+      <div class="page-title">Finan<em>zas</em></div>
+      <div class="page-sub">Control simple, mente libre.</div>
+
+      <div class="grid-3" style="margin-bottom:20px">
+        <div class="stat-box">
+          <div class="stat-label">Ingresos mes</div>
+          <div class="stat-value green" id="fin-ingresos">$0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Gastos mes</div>
+          <div class="stat-value" style="color:var(--danger)" id="fin-gastos">$0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Balance</div>
+          <div class="stat-value orange" id="fin-balance">$0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registrar movimiento</div>
+        <div class="grid-2">
+          <div class="inp-group">
+            <label class="inp-label">Tipo</label>
+            <select class="inp" id="fin-tipo">
+              <option value="ingreso">Ingreso</option>
+              <option value="gasto">Gasto</option>
+            </select>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Categoría</label>
+            <select class="inp" id="fin-cat">
+              <option>Comida</option>
+              <option>Gym</option>
+              <option>Ocio</option>
+              <option>Transporte</option>
+              <option>Ropa</option>
+              <option>Salud</option>
+              <option>Trabajo/Estudio</option>
+              <option>Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="inp-group">
+            <label class="inp-label">Monto</label>
+            <input type="number" class="inp" id="fin-monto" placeholder="0">
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Descripción</label>
+            <input type="text" class="inp" id="fin-desc" placeholder="Ej: Mercado">
+          </div>
+        </div>
+        <button class="btn" onclick="addFinance()">Registrar ✦</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Historial</div>
+        <div id="finance-list"></div>
+      </div>
+    </div>
+
+    <!-- METAS -->
+    <div class="section" id="s-metas">
+      <div class="page-title">Metas <em>y Logros</em></div>
+      <div class="page-sub">Pequeños pasos, grandes distancias.</div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('metas-tab','tab-metas-list',this)">🎯 Metas</div>
+        <div class="tab" onclick="switchTab('metas-tab','tab-logros',this)">🏆 Logros</div>
+      </div>
+
+      <div class="tab-content active" id="tab-metas-list">
+        <div class="card">
+          <div class="card-title">Metas semanales</div>
+          <div class="meta-item">
+            <div>
+              <div style="font-size:0.88rem">Ir 3 veces al gym</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Esta semana</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+              <div class="meta-progress">2/3</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div>
+              <div style="font-size:0.88rem">Comer bien 5 días</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Esta semana</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+              <div class="meta-progress">3/5</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div>
+              <div style="font-size:0.88rem">Registrar emociones</div>
+              <div style="font-size:0.75px;color:var(--muted)">Esta semana</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+              <div class="meta-progress" style="color:var(--success)">7/7 ✦</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Metas mensuales</div>
+          <div class="meta-item">
+            <div>
+              <div style="font-size:0.88rem">Bajar % grasa corporal</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Este mes</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+              <div class="meta-progress">En progreso</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div>
+              <div style="font-size:0.88rem">Mejorar fuerza en press banca</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Este mes</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+              <div class="meta-progress">+5 kg</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Agregar meta</div>
+          <div class="grid-2">
+            <div class="inp-group"><label class="inp-label">Descripción</label><input type="text" class="inp" id="meta-desc" placeholder="Mi meta..."></div>
+            <div class="inp-group">
+              <label class="inp-label">Plazo</label>
+              <select class="inp" id="meta-plazo">
+                <option>Semanal</option>
+                <option>Mensual</option>
+                <option>Anual</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" onclick="addMeta()">Agregar meta ✦</button>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-logros">
+        <div class="grid-2" id="badges-grid"></div>
+      </div>
+    </div>
+
+    <!-- OCIO -->
+    <div class="section" id="s-ocio">
+      <div class="page-title">O<em>cio</em></div>
+      <div class="page-sub">Tu vida no es solo el gym.</div>
+
+      <div class="card">
+        <div class="card-title">Registrar</div>
+        <div class="grid-2">
+          <div class="inp-group">
+            <label class="inp-label">Tipo</label>
+            <select class="inp" id="ocio-tipo">
+              <option>📚 Libro</option>
+              <option>🎬 Película</option>
+              <option>📺 Serie</option>
+              <option>🎮 Juego</option>
+            </select>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Nombre</label>
+            <input type="text" class="inp" id="ocio-nombre" placeholder="Título...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="inp-group">
+            <label class="inp-label">Calificación (1-5 ⭐)</label>
+            <select class="inp" id="ocio-rating">
+              <option>⭐</option>
+              <option>⭐⭐</option>
+              <option>⭐⭐⭐</option>
+              <option>⭐⭐⭐⭐</option>
+              <option>⭐⭐⭐⭐⭐</option>
+            </select>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Comentario</label>
+            <input type="text" class="inp" id="ocio-comment" placeholder="Opcional...">
+          </div>
+        </div>
+        <button class="btn" onclick="addOcio()">Agregar ✦</button>
+      </div>
+
+      <div class="grid-3" id="ocio-grid">
+        <!-- injected -->
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- Day modal -->
+<div class="modal-overlay" id="day-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-day-title">Día</div>
+    <div class="inp-group">
+      <label class="inp-label">Tipo de entrenamiento</label>
+      <select class="inp" id="modal-tipo">
+        <option value="">Sin registrar</option>
+        <option value="fuerza">💪 Fuerza</option>
+        <option value="cardio">🏃 Cardio</option>
+        <option value="descanso">😴 Descanso</option>
+        <option value="natacion">🏊 Natación</option>
+        <option value="volleyball">🏐 Volleyball</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button class="btn" onclick="saveDayModal()">Guardar</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA STORE (localStorage) ──
+const S = {
+  get: (k,d=[]) => { try { return JSON.parse(localStorage.getItem('sp_'+k)) ?? d; } catch { return d; } },
+  set: (k,v) => localStorage.setItem('sp_'+k, JSON.stringify(v))
+};
+
+// ── LOGIN ──
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value.trim().toLowerCase();
+  if ((u === 'pedro castilla' || u === 'pedro') && p === 'teamo') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── NAVIGATION ──
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id==='entrenamiento') renderYearGrid();
+  if (id==='metas') renderBadges();
+  if (id==='dashboard') updateDashboard();
+}
+
+function switchTab(group, tabId, el) {
+  const parent = el.closest('.section') || document.body;
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// ── DASHBOARD ──
+const quotes = [
+  "Estás avanzando aunque no lo veas.",
+  "Cada día que apareces, ya ganaste.",
+  "No necesitas ser perfecto, solo constante.",
+  "Tu cuerpo está haciendo lo que puede. Respétalo.",
+  "El progreso no siempre se ve. Pero existe.",
+  "Hoy también cuenta."
+];
+
+function updateDashboard() {
+  const now = new Date();
+  document.getElementById('dash-date-text').textContent = now.toLocaleDateString('es-CO', {weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('dash-time').textContent = now.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('dash-quote').textContent = '"' + quotes[now.getDay()] + '"';
+
+  const emotions = S.get('emotions', []);
+  const today = now.toDateString();
+  const todayEmo = emotions.find(e => new Date(e.date).toDateString()===today);
+  document.getElementById('dash-emotion').textContent = todayEmo ? todayEmo.emoji : '—';
+
+  const trainings = S.get('trainings', []);
+  const todayTrain = trainings.find(t => new Date(t.date).toDateString()===today);
+  document.getElementById('dash-trained').textContent = todayTrain ? '✔' : '—';
+
+  const meals = S.get('meals', {});
+  const todayMeals = meals[today] || {};
+  let cal = 0;
+  Object.values(todayMeals).forEach(m => cal += parseInt(m.cal||0));
+  document.getElementById('dash-cal').textContent = cal > 0 ? cal+' kcal' : '—';
+
+  const finances = S.get('finances', []);
+  let bal = 0;
+  finances.forEach(f => bal += f.tipo==='ingreso' ? f.monto : -f.monto);
+  document.getElementById('dash-balance').textContent = '$' + bal.toLocaleString();
+
+  // tasks preview
+  const tasks = S.get('tasks', []);
+  const taskList = document.getElementById('dash-tasks-list');
+  const pending = tasks.filter(t=>!t.done).slice(0,3);
+  taskList.innerHTML = pending.length ? pending.map(t=>`<div class="task-item"><div class="task-check" style="border-color:var(--muted)"></div><div class="task-text">${t.text}</div></div>`).join('') : '<div style="color:var(--muted);font-size:0.85rem">Sin pendientes ✦</div>';
+
+  // actions preview from mood
+  const actDiv = document.getElementById('dash-actions-preview');
+  if (todayEmo) {
+    actDiv.innerHTML = getActions(todayEmo.mood).map(a=>`<div class="action-item"><span class="action-icon">${a.icon}</span>${a.text}</div>`).join('');
+  }
+}
+
+// ── EMOCIONAL ──
+let selectedMood = null;
+function selectMood(el, emoji, mood) {
+  document.querySelectorAll('.emoji-btn').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMood = { emoji, mood };
+  showActions(mood);
+}
+
+function getActions(mood) {
+  const map = {
+    bad: [
+      {icon:'🚶',text:'Salir a caminar 10 minutos'},
+      {icon:'🪞',text:'Evita mirarte al espejo hoy'},
+      {icon:'📝',text:'Escribe 3 cosas que sí haces bien'},
+      {icon:'🏋️',text:'Ir al gym suave, sin exigirte'},
+      {icon:'🎵',text:'Escucha música que te guste'}
+    ],
+    neutral: [
+      {icon:'💪',text:'Entrena ligero hoy'},
+      {icon:'🥗',text:'Come bien, un paso a la vez'},
+      {icon:'💧',text:'Toma suficiente agua'},
+      {icon:'😴',text:'Intenta dormir mejor esta noche'},
+      {icon:'🙅',text:'Evita compararte con otros hoy'}
+    ],
+    good: [
+      {icon:'🔥',text:'Sube la intensidad en el gym'},
+      {icon:'🆕',text:'Prueba un ejercicio nuevo'},
+      {icon:'📸',text:'Tómate una foto de progreso'},
+      {icon:'🤝',text:'Ayuda a alguien hoy'},
+      {icon:'📋',text:'Planea tu meta para la próxima semana'}
+    ],
+    great: [
+      {icon:'🔥',text:'¡Hoy es tu día — dale todo!'},
+      {icon:'🆕',text:'Explora un ejercicio nuevo'},
+      {icon:'📸',text:'Documenta tu progreso'},
+      {icon:'🤝',text:'Inspira a alguien hoy'},
+      {icon:'🎯',text:'Define una meta ambiciosa esta semana'}
+    ]
+  };
+  return map[mood] || map.neutral;
+}
+
+function showActions(mood) {
+  const card = document.getElementById('actions-card');
+  const list = document.getElementById('actions-list');
+  card.style.display = 'block';
+  list.innerHTML = getActions(mood).map(a=>`<div class="action-item"><span class="action-icon">${a.icon}</span>${a.text}</div>`).join('');
+}
+
+function saveEmotion() {
+  if(!selectedMood) { showToast('Elige cómo te sientes primero'); return; }
+  const emotions = S.get('emotions', []);
+  emotions.push({ date: new Date().toISOString(), ...selectedMood, thought: document.getElementById('body-thought').value });
+  S.set('emotions', emotions);
+  showToast('✦ Estado emocional guardado');
+}
+
+// ── ENTRENAMIENTO ──
+let currentDayKey = null;
+
+function renderYearGrid() {
+  const container = document.getElementById('year-grid-container');
+  const trainData = S.get('trainings', []);
+  const trainMap = {};
+  trainData.forEach(t => { trainMap[t.dayKey] = t.tipo; });
+
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const today = new Date();
+  let html = '';
+
+  for(let m=0; m<12; m++) {
+    const daysInMonth = new Date(2025, m+1, 0).getDate();
+    html += `<div class="month-block"><div class="month-label">${months[m]} 2025</div><div class="days-row">`;
+    for(let d=1; d<=daysInMonth; d++) {
+      const key = `2025-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const tipo = trainMap[key] || '';
+      const isToday = today.getFullYear()===2025 && today.getMonth()===m && today.getDate()===d;
+      html += `<div class="day-cell ${tipo} ${isToday?'today':''}" onclick="openDayModal('${key}',${d},'${months[m]}')" title="${key}: ${tipo||'Sin registrar'}"></div>`;
+    }
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function openDayModal(key, day, month) {
+  currentDayKey = key;
+  document.getElementById('modal-day-title').textContent = `${day} de ${month} 2025`;
+  const trainData = S.get('trainings', []);
+  const existing = trainData.find(t=>t.dayKey===key);
+  document.getElementById('modal-tipo').value = existing ? existing.tipo : '';
+  document.getElementById('day-modal').classList.add('open');
+}
+
+function saveDayModal() {
+  const tipo = document.getElementById('modal-tipo').value;
+  const trainData = S.get('trainings', []);
+  const idx = trainData.findIndex(t=>t.dayKey===currentDayKey);
+  if(tipo) {
+    if(idx>=0) trainData[idx].tipo = tipo;
+    else trainData.push({ dayKey: currentDayKey, tipo, date: currentDayKey, exercises:[] });
+  } else {
+    if(idx>=0) trainData.splice(idx,1);
+  }
+  S.set('trainings', trainData);
+  closeModal();
+  renderYearGrid();
+  showToast('✦ Día actualizado');
+}
+
+function closeModal() {
+  document.getElementById('day-modal').classList.remove('open');
+}
+
+let exerciseCount = 0;
+function addExerciseRow() {
+  const list = document.getElementById('exercise-list');
+  const id = ++exerciseCount;
+  const row = document.createElement('div');
+  row.className = 'exercise-row';
+  row.id = 'ex-'+id;
+  row.innerHTML = `
+    <input type="text" class="inp" placeholder="Press banca..." id="ex-name-${id}">
+    <input type="number" class="inp" placeholder="70" id="ex-peso-${id}">
+    <input type="number" class="inp" placeholder="4" id="ex-series-${id}">
+    <input type="number" class="inp" placeholder="10" id="ex-reps-${id}">
+    <button class="btn-danger" onclick="document.getElementById('ex-${id}').remove()">✕</button>
+  `;
+  list.appendChild(row);
+}
+
+function saveTraining() {
+  const tipo = document.getElementById('train-tipo').value.toLowerCase();
+  const grupo = document.getElementById('train-grupo').value;
+  const km = document.getElementById('train-km').value;
+  const tiempo = document.getElementById('train-tiempo').value;
+  const exercises = [];
+  document.querySelectorAll('[id^="ex-name-"]').forEach(inp => {
+    const id = inp.id.split('-').pop();
+    exercises.push({
+      name: inp.value,
+      peso: document.getElementById('ex-peso-'+id).value,
+      series: document.getElementById('ex-series-'+id).value,
+      reps: document.getElementById('ex-reps-'+id).value
+    });
+  });
+  const trainings = S.get('trainings', []);
+  const today = new Date();
+  const dayKey = today.toISOString().split('T')[0];
+  const idx = trainings.findIndex(t=>t.dayKey===dayKey);
+  const entry = { dayKey, date: today.toISOString(), tipo, grupo, km, tiempo, exercises };
+  if(idx>=0) trainings[idx] = entry; else trainings.push(entry);
+  S.set('trainings', trainings);
+  showToast('✦ Entrenamiento guardado');
+  updateDashboard();
+}
+
+function applyRutina(name) {
+  const rutinas = {
+    pecho: [['Press banca plano','80','4','10'],['Press inclinado','70','3','12'],['Aperturas cable','20','3','15'],['Fondos','—','3','12']],
+    pierna: [['Sentadilla','100','4','8'],['Prensa','120','3','12'],['Extensión cuádriceps','50','3','15'],['Curl femoral','40','3','12']],
+    espalda: [['Jalón al pecho','70','4','12'],['Remo con barra','80','3','10'],['Pull-ups','—','3','8'],['Remo en máquina','60','3','15']],
+    cardio: [['Bici 5 min','—','1','—'],['Burpees','—','4','10'],['Saltos de cuerda','—','3','60s'],['Trote en banda','—','1','20min']]
+  };
+  document.getElementById('exercise-list').innerHTML = '';
+  exerciseCount = 0;
+  (rutinas[name]||[]).forEach(([n,p,s,r]) => {
+    addExerciseRow();
+    const id = exerciseCount;
+    document.getElementById('ex-name-'+id).value = n;
+    document.getElementById('ex-peso-'+id).value = p;
+    document.getElementById('ex-series-'+id).value = s;
+    document.getElementById('ex-reps-'+id).value = r;
+  });
+  showToast('✦ Rutina cargada: '+name);
+}
+
+function saveRutina() {
+  showToast('✦ Rutina guardada');
+}
+
+// ── NUTRICIÓN ──
+const mealTypes = ['Desayuno','Almuerzo','Cena','Snacks'];
+function renderMeals() {
+  const today = new Date().toDateString();
+  const meals = S.get('meals', {});
+  const todayMeals = meals[today] || {};
+  let html = '';
+  let totalCal=0, totalProt=0, totalCarbs=0, totalFat=0;
+  mealTypes.forEach(meal => {
+    const m = todayMeals[meal] || {};
+    const cal = parseInt(m.cal||0), prot = parseInt(m.prot||0), carbs = parseInt(m.carbs||0), fat = parseInt(m.fat||0);
+    totalCal+=cal; totalProt+=prot; totalCarbs+=carbs; totalFat+=fat;
+    html += `<div class="card">
+      <div class="meal-title">${meal}</div>
+      <div class="grid-2" style="gap:8px;margin-bottom:10px">
+        <input type="text" class="inp" id="meal-${meal}-food" placeholder="Alimentos..." value="${m.food||''}">
+        <input type="number" class="inp" id="meal-${meal}-cal" placeholder="kcal" value="${m.cal||''}">
+      </div>
+      <div class="grid-3" style="gap:8px">
+        <input type="number" class="inp" id="meal-${meal}-prot" placeholder="Proteína g" value="${m.prot||''}">
+        <input type="number" class="inp" id="meal-${meal}-carbs" placeholder="Carbs g" value="${m.carbs||''}">
+        <input type="number" class="inp" id="meal-${meal}-fat" placeholder="Grasa g" value="${m.fat||''}">
+      </div>
+      <button class="btn-ghost" style="margin-top:10px" onclick="saveMeal('${meal}')">Guardar ${meal}</button>
+    </div>`;
+  });
+  document.getElementById('meals-container').innerHTML = html;
+
+  document.getElementById('nut-cal-total').textContent = totalCal + ' kcal';
+  document.getElementById('nut-prot').textContent = totalProt + 'g';
+  document.getElementById('nut-carbs').textContent = totalCarbs + 'g';
+
+  const total = totalProt + totalCarbs + totalFat || 1;
+  const pp = Math.round(totalProt/total*100), cp = Math.round(totalCarbs/total*100), fp = Math.round(totalFat/total*100);
+  document.getElementById('prot-pct').textContent = pp+'%';
+  document.getElementById('carb-pct').textContent = cp+'%';
+  document.getElementById('fat-pct').textContent = fp+'%';
+  document.getElementById('prot-bar').style.width = pp+'%';
+  document.getElementById('carb-bar').style.width = cp+'%';
+  document.getElementById('fat-bar').style.width = fp+'%';
+}
+
+function saveMeal(meal) {
+  const today = new Date().toDateString();
+  const meals = S.get('meals', {});
+  if(!meals[today]) meals[today] = {};
+  meals[today][meal] = {
+    food: document.getElementById('meal-'+meal+'-food').value,
+    cal: document.getElementById('meal-'+meal+'-cal').value,
+    prot: document.getElementById('meal-'+meal+'-prot').value,
+    carbs: document.getElementById('meal-'+meal+'-carbs').value,
+    fat: document.getElementById('meal-'+meal+'-fat').value
+  };
+  S.set('meals', meals);
+  renderMeals();
+  showToast('✦ '+meal+' guardado');
+}
+
+// ── DIARIO ──
+function saveDiary() {
+  const text = document.getElementById('diary-input').value.trim();
+  if(!text) return;
+  const entries = S.get('diary', []);
+  entries.unshift({ date: new Date().toISOString(), text });
+  S.set('diary', entries);
+  document.getElementById('diary-input').value = '';
+  renderDiary();
+  showToast('✦ Entrada guardada');
+}
+
+function renderDiary() {
+  const entries = S.get('diary', []);
+  const div = document.getElementById('diary-entries');
+  div.innerHTML = entries.slice(0,10).map(e => `<div class="diary-entry">
+    <div class="diary-date">${new Date(e.date).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="diary-text">${e.text}</div>
+  </div>`).join('') || '<div style="color:var(--muted);font-size:0.85rem">Aún no hay entradas.</div>';
+}
+
+// ── AGENDA ──
+function addTask() {
+  const inp = document.getElementById('task-input');
+  const text = inp.value.trim();
+  if(!text) return;
+  const tasks = S.get('tasks', []);
+  // Simple subtask split
+  const subtasks = text.length > 20 ? [
+    { text: '→ Empezar: '+text.slice(0,30), done: false },
+    { text: '→ Continuar', done: false },
+    { text: '→ Revisar y cerrar', done: false }
+  ] : [];
+  tasks.push({ text, done: false, subtasks, date: new Date().toISOString() });
+  S.set('tasks', tasks);
+  inp.value = '';
+  renderTasks();
+  updateDashboard();
+}
+
+function toggleTask(i) {
+  const tasks = S.get('tasks', []);
+  tasks[i].done = !tasks[i].done;
+  S.set('tasks', tasks);
+  renderTasks();
+  updateDashboard();
+}
+
+function renderTasks() {
+  const tasks = S.get('tasks', []);
+  const div = document.getElementById('task-list');
+  if(!tasks.length) { div.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Sin tareas. ¡Agrega una!</div>'; return; }
+  div.innerHTML = tasks.map((t,i) => `
+    <div class="task-item">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${i})">${t.done?'✓':''}</div>
+      <div>
+        <div class="task-text ${t.done?'done':''}">${t.text}</div>
+        ${t.subtasks?.length ? '<div class="task-sub">'+t.subtasks.map(s=>`<span style="margin-right:10px;color:var(--muted)">${s.text}</span>`).join('')+'</div>' : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── FINANZAS ──
+function addFinance() {
+  const tipo = document.getElementById('fin-tipo').value;
+  const cat = document.getElementById('fin-cat').value;
+  const monto = parseFloat(document.getElementById('fin-monto').value);
+  const desc = document.getElementById('fin-desc').value;
+  if(!monto) { showToast('Ingresa un monto'); return; }
+  const finances = S.get('finances', []);
+  finances.push({ tipo, cat, monto, desc, date: new Date().toISOString() });
+  S.set('finances', finances);
+  document.getElementById('fin-monto').value = '';
+  document.getElementById('fin-desc').value = '';
+  renderFinances();
+  showToast('✦ Movimiento registrado');
+}
+
+function renderFinances() {
+  const finances = S.get('finances', []);
+  let ingresos=0, gastos=0;
+  finances.forEach(f => { if(f.tipo==='ingreso') ingresos+=f.monto; else gastos+=f.monto; });
+  document.getElementById('fin-ingresos').textContent = '$'+ingresos.toLocaleString();
+  document.getElementById('fin-gastos').textContent = '$'+gastos.toLocaleString();
+  const bal = ingresos-gastos;
+  document.getElementById('fin-balance').textContent = '$'+bal.toLocaleString();
+  document.getElementById('dash-balance').textContent = '$'+bal.toLocaleString();
+
+  const list = document.getElementById('finance-list');
+  list.innerHTML = finances.slice().reverse().slice(0,15).map(f => `
+    <div class="finance-row">
+      <div>
+        <div style="font-size:0.88rem">${f.desc || f.cat}</div>
+        <div class="finance-cat">${f.cat} · ${new Date(f.date).toLocaleDateString('es-CO')}</div>
+      </div>
+      <div class="${f.tipo==='ingreso'?'amount-pos':'amount-neg'}">${f.tipo==='ingreso'?'+':'-'}$${f.monto.toLocaleString()}</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:0.85rem">Sin movimientos aún.</div>';
+}
+
+// ── METAS ──
+function addMeta() {
+  const desc = document.getElementById('meta-desc').value.trim();
+  if(!desc) return;
+  const plazo = document.getElementById('meta-plazo').value;
+  const metas = S.get('metas', []);
+  metas.push({ desc, plazo, progress: 0, date: new Date().toISOString() });
+  S.set('metas', metas);
+  document.getElementById('meta-desc').value = '';
+  showToast('✦ Meta agregada');
+}
+
+// ── LOGROS ──
+const allBadges = [
+  { icon:'🔥', name:'5 días seguidos', desc:'Entrenaste 5 días consecutivos', key:'streak5' },
+  { icon:'📝', name:'Diario constante', desc:'Registraste emociones 7 días seguidos', key:'emo7' },
+  { icon:'💪', name:'Primer mes', desc:'Completaste un mes de entrenamiento', key:'month1' },
+  { icon:'🥗', name:'Semana limpia', desc:'Registraste nutrición 7 días', key:'nut7' },
+  { icon:'🧠', name:'Sin hablarme mal', desc:'Un día sin comentarios negativos sobre ti', key:'nokill' },
+  { icon:'🌱', name:'Inicio', desc:'Creaste tu Sistema Pedro', key:'start' },
+];
+
+function renderBadges() {
+  const unlocked = S.get('badges', ['start']);
+  const grid = document.getElementById('badges-grid');
+  grid.innerHTML = allBadges.map(b => {
+    const isUnlocked = unlocked.includes(b.key);
+    return `<div class="badge ${isUnlocked?'unlocked':'badge-locked'}">
+      <div class="badge-icon">${b.icon}</div>
+      <div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── OCIO ──
+function addOcio() {
+  const tipo = document.getElementById('ocio-tipo').value;
+  const nombre = document.getElementById('ocio-nombre').value.trim();
+  if(!nombre) return;
+  const rating = document.getElementById('ocio-rating').value;
+  const comment = document.getElementById('ocio-comment').value;
+  const ocio = S.get('ocio', []);
+  ocio.unshift({ tipo, nombre, rating, comment, date: new Date().toISOString() });
+  S.set('ocio', ocio);
+  document.getElementById('ocio-nombre').value = '';
+  document.getElementById('ocio-comment').value = '';
+  renderOcio();
+  showToast('✦ '+nombre+' agregado');
+}
+
+function renderOcio() {
+  const ocio = S.get('ocio', []);
+  const grid = document.getElementById('ocio-grid');
+  if(!ocio.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:16px">Nada registrado aún.</div>'; return; }
+  grid.innerHTML = ocio.map(o => `<div class="media-card">
+    <div class="media-type">${o.tipo}</div>
+    <div class="media-name">${o.nombre}</div>
+    <div class="media-stars">${o.rating}</div>
+    ${o.comment ? `<div style="font-size:0.78rem;color:var(--muted)">${o.comment}</div>` : ''}
+  </div>`).join('');
+}
+
+// ── INIT ──
+function initApp() {
+  updateDashboard();
+  renderDiary();
+  renderTasks();
+  renderFinances();
+  renderMeals();
+  renderOcio();
+  addExerciseRow();
+  // Unlock start badge
+  const badges = S.get('badges', []);
+  if(!badges.includes('start')) { badges.push('start'); S.set('badges', badges); }
+  // Refresh time
+  setInterval(() => {
+    if(document.getElementById('s-dashboard').classList.contains('active')) {
+      document.getElementById('dash-time').textContent = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    }
+  }, 60000);
+}
+
+// Close modal on backdrop click
+document.getElementById('day-modal').addEventListener('click', function(e) {
+  if(e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
