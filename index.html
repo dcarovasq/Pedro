@@ -1185,12 +1185,12 @@ function renderYearGrid() {
   let html = '';
 
   for(let m=0; m<12; m++) {
-    const daysInMonth = new Date(2025, m+1, 0).getDate();
-    html += `<div class="month-block"><div class="month-label">${months[m]} 2025</div><div class="days-row">`;
+    const daysInMonth = new Date(2026, m+1, 0).getDate();
+    html += `<div class="month-block"><div class="month-label">${months[m]} 2026</div><div class="days-row">`;
     for(let d=1; d<=daysInMonth; d++) {
-      const key = `2025-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const key = `2026-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const tipo = trainMap[key] || '';
-      const isToday = today.getFullYear()===2025 && today.getMonth()===m && today.getDate()===d;
+      const isToday = today.getFullYear()===2026 && today.getMonth()===m && today.getDate()===d;
       html += `<div class="day-cell ${tipo} ${isToday?'today':''}" onclick="openDayModal('${key}',${d},'${months[m]}')" title="${key}: ${tipo||'Sin registrar'}"></div>`;
     }
     html += '</div></div>';
@@ -1200,7 +1200,7 @@ function renderYearGrid() {
 
 function openDayModal(key, day, month) {
   currentDayKey = key;
-  document.getElementById('modal-day-title').textContent = `${day} de ${month} 2025`;
+  document.getElementById('modal-day-title').textContent = `${day} de ${month} 2026`;
   const trainData = S.get('trainings', []);
   const existing = trainData.find(t=>t.dayKey===key);
   document.getElementById('modal-tipo').value = existing ? existing.tipo : '';
